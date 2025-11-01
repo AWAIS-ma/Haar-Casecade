@@ -17,16 +17,16 @@ def detect_faces(image, save_path=None):
     cv2.destroyAllWindows()
 
     if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)  # Create folder if it doesn't exist
         cv2.imwrite(save_path, image)
         print(f"Detected image saved as: {save_path}")
 
 def choose_image_file():
-    """Open a file dialog to select an image file."""
-    root = Tk()  # Create a Tk root window
-    root.withdraw()  # Hide the main window
-    root.attributes('-topmost', True)  # Bring file dialog to front
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
     file_path = askopenfilename(filetypes=[("Image files", "*.jpg *.jpeg *.png")])
-    root.destroy()  # Destroy the hidden root window after selection
+    root.destroy()
     return file_path
 
 def live_camera_face_detection():
@@ -64,8 +64,9 @@ if choice == '1':
     file_path = choose_image_file()
     if file_path:
         image = cv2.imread(file_path)
-        base, ext = os.path.splitext(file_path)
-        save_path = f"{base}_detected{ext}"
+        base_name = os.path.basename(file_path)  # Get only the file name
+        name, ext = os.path.splitext(base_name)
+        save_path = f"output_images/{name}_detected{ext}"
         detect_faces(image, save_path=save_path)
     else:
         print("No file selected.")
