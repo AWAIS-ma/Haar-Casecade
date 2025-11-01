@@ -1,11 +1,11 @@
 import cv2
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
+import os
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-def detect_faces(image):
-    """Detect faces in the given image and display it."""
+def detect_faces(image, save_path=None):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5, minSize=(30, 30))
 
@@ -16,16 +16,21 @@ def detect_faces(image):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+    if save_path:
+        cv2.imwrite(save_path, image)
+        print(f"Detected image saved as: {save_path}")
+
 def choose_image_file():
     """Open a file dialog to select an image file."""
-    Tk().withdraw() 
+    root = Tk()  # Create a Tk root window
+    root.withdraw()  # Hide the main window
+    root.attributes('-topmost', True)  # Bring file dialog to front
     file_path = askopenfilename(filetypes=[("Image files", "*.jpg *.jpeg *.png")])
+    root.destroy()  # Destroy the hidden root window after selection
     return file_path
 
 def live_camera_face_detection():
-    """Open the webcam and detect faces live."""
     cap = cv2.VideoCapture(0)
-
     if not cap.isOpened():
         print("Cannot access the camera")
         return
@@ -49,6 +54,7 @@ def live_camera_face_detection():
     cap.release()
     cv2.destroyAllWindows()
 
+# Menu options
 print("Select an option:")
 print("1: Detect faces in an image file (PNG or JPG)")
 print("2: Live face detection using the camera")
@@ -58,7 +64,9 @@ if choice == '1':
     file_path = choose_image_file()
     if file_path:
         image = cv2.imread(file_path)
-        detect_faces(image)
+        base, ext = os.path.splitext(file_path)
+        save_path = f"{base}_detected{ext}"
+        detect_faces(image, save_path=save_path)
     else:
         print("No file selected.")
 elif choice == '2':
